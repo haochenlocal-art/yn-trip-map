@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#0ea5e9" />
+    <title>云南7日行 · 地图行程</title>
+    <!-- 如使用高德底图，无需额外CSS，此处仅保留应用样式 -->
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-left">
+        <span class="logo">YN</span>
+        <div class="titles">
+          <h1>云南7日行</h1>
+          <p>昆明 · 大理 · 丽江 · 香格里拉</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="locateBtn" class="btn btn-icon" aria-label="定位到我">
+          <span>📍</span>
+        </button>
+        <button id="fitAllBtn" class="btn btn-icon" aria-label="查看全程">
+          <span>🗺️</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div id="map"></div>
+
+      <nav class="day-tabs" id="dayTabs" aria-label="天数切换">
+        <!-- 动态渲染 -->
+      </nav>
+
+      <section class="bottom-sheet" id="bottomSheet" aria-live="polite">
+        <div class="sheet-handle" id="sheetHandle"></div>
+        <div class="sheet-content">
+          <div class="sheet-header">
+            <h2 id="sheetTitle">行程详情</h2>
+            <button id="toggleDaysBtn" class="btn btn-text">显示全部天数</button>
+          </div>
+          <div class="sheet-body" id="sheetBody">
+            <!-- 动态渲染每日行程卡片 -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <template id="dayCardTpl">
+      <article class="day-card">
+        <header class="day-card-header">
+          <div class="badge"></div>
+          <div class="titles">
+            <h3 class="day-title"></h3>
+            <p class="day-subtitle"></p>
+          </div>
+          <button class="btn btn-pill btn-focus" data-action="focus">在地图查看</button>
+        </header>
+        <ul class="poi-list"></ul>
+      </article>
+    </template>
+
+    <!-- AMap Loader -->
+    <script src="https://webapi.amap.com/loader.js"></script>
+    <script src="./app.js"></script>
+  </body>
+  </html>
+
+

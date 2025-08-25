@@ -1,0 +1,28 @@
+{
+  "name": "yn-trip-map",
+  "version": "1.0.0",
+  "description": "云南7日行程地图应用 - 基于高德地图的旅行路线规划工具",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "build": "echo 'Static site, no build needed'",
+    "start": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "travel",
+    "map",
+    "yunnan",
+    "amap",
+    "trip-planning"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/yn-trip-map.git"
+  },
+  "homepage": "https://yn-trip-map.vercel.app",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
