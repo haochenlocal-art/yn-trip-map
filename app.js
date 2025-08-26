@@ -579,115 +579,140 @@ function setupGlobalActions() {
       }
     }, 5000);
     
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        try {
-          clearTimeout(timeoutWarning);
-          const { latitude, longitude, accuracy } = pos.coords;
-          
-          // 验证坐标有效性
-          if (isNaN(latitude) || isNaN(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-            throw new Error('获取到的坐标数据无效');
-          }
-          
-          // 移除之前的位置标记
-          if (window.currentLocationMarkers) {
-            window.currentLocationMarkers.forEach(marker => map.remove(marker));
-          }
-          window.currentLocationMarkers = [];
-          
-          // 创建新的位置标记
-          const locationMarker = new AMap.CircleMarker({ 
-            center: [longitude, latitude], 
-            radius: Math.max(8, Math.min(20, accuracy / 10)), // 根据精度调整标记大小
-            strokeColor: '#10b981', 
-            fillColor: '#10b981', 
-            fillOpacity: 0.3,
-            strokeWeight: 2
-          });
-          
-          // 添加中心点
-          const centerDot = new AMap.CircleMarker({
-            center: [longitude, latitude],
-            radius: 4,
-            strokeColor: '#ffffff',
-            fillColor: '#10b981',
-            fillOpacity: 1,
-            strokeWeight: 2
-          });
-          
-          // 创建标签标记（使用普通Marker来显示标签）
-          const labelMarker = new AMap.Marker({
-            position: [longitude, latitude],
-            content: `<div style="color:#10b981;font-size:12px;background:#fff;border:1px solid #10b981;padding:4px 8px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1);font-weight:600;transform:translateY(-35px);">📍 我的位置</div>`,
-            offset: new AMap.Pixel(0, 0)
-          });
-          
-          window.currentLocationMarkers = [locationMarker, centerDot, labelMarker];
-          map.add(window.currentLocationMarkers);
-          
-          // 设置地图中心和缩放级别
-          map.setZoomAndCenter(15, [longitude, latitude]);
-          
-          // 恢复按钮状态
-          locateBtn.innerHTML = originalContent;
-          locateBtn.disabled = false;
-          
-          // 显示成功提示
-          const accuracyText = accuracy < 100 ? '高精度' : accuracy < 500 ? '中等精度' : '低精度';
-          console.log('✅ 定位成功！精度: ' + accuracy.toFixed(0) + '米 (' + accuracyText + ')');
-          
-          // 显示临时成功提示
-          locateBtn.innerHTML = '✅ 定位成功';
-          setTimeout(() => {
-            if (!locateBtn.disabled) {
-              locateBtn.innerHTML = originalContent;
-            }
-          }, 2000);
-          
-        } catch (err) {
-          clearTimeout(timeoutWarning);
-          console.error('定位处理错误:', err);
-          // 恢复按钮状态
-          locateBtn.innerHTML = originalContent;
-          locateBtn.disabled = false;
-          alert('❌ 定位数据处理失败：' + (err.message || '未知错误') + '\n\n请重试或检查设备GPS功能');
-        }
-      },
-      (error) => {
+    // 定位成功处理函数
+    const handleLocationSuccess = (pos) => {
+      try {
         clearTimeout(timeoutWarning);
+        const { latitude, longitude, accuracy } = pos.coords;
+        
+        // 验证坐标有效性
+        if (isNaN(latitude) || isNaN(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+          throw new Error('获取到的坐标数据无效');
+        }
+        
+        // 移除之前的位置标记
+        if (window.currentLocationMarkers) {
+          window.currentLocationMarkers.forEach(marker => map.remove(marker));
+        }
+        window.currentLocationMarkers = [];
+        
+        // 创建新的位置标记
+        const locationMarker = new AMap.CircleMarker({ 
+          center: [longitude, latitude], 
+          radius: Math.max(8, Math.min(20, accuracy / 10)), // 根据精度调整标记大小
+          strokeColor: '#10b981', 
+          fillColor: '#10b981', 
+          fillOpacity: 0.3,
+          strokeWeight: 2
+        });
+        
+        // 添加中心点
+        const centerDot = new AMap.CircleMarker({
+          center: [longitude, latitude],
+          radius: 4,
+          strokeColor: '#ffffff',
+          fillColor: '#10b981',
+          fillOpacity: 1,
+          strokeWeight: 2
+        });
+        
+        // 创建标签标记（使用普通Marker来显示标签）
+        const labelMarker = new AMap.Marker({
+          position: [longitude, latitude],
+          content: `<div style="color:#10b981;font-size:12px;background:#fff;border:1px solid #10b981;padding:4px 8px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1);font-weight:600;transform:translateY(-35px);">📍 我的位置</div>`,
+          offset: new AMap.Pixel(0, 0)
+        });
+        
+        window.currentLocationMarkers = [locationMarker, centerDot, labelMarker];
+        map.add(window.currentLocationMarkers);
+        
+        // 设置地图中心和缩放级别
+        map.setZoomAndCenter(15, [longitude, latitude]);
+        
         // 恢复按钮状态
         locateBtn.innerHTML = originalContent;
         locateBtn.disabled = false;
         
-        let errorMessage = '❌ 定位失败';
-        let detailMessage = '';
+        // 显示成功提示
+        const accuracyText = accuracy < 100 ? '高精度' : accuracy < 500 ? '中等精度' : '低精度';
+        console.log('✅ 定位成功！精度: ' + accuracy.toFixed(0) + '米 (' + accuracyText + ')');
         
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = '❌ 定位权限被拒绝';
-            detailMessage = '请在浏览器地址栏左侧点击锁图标，允许此网站访问您的位置信息，然后刷新页面重试。';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = '❌ 无法获取位置信息';
-            detailMessage = '可能原因：\n• GPS信号弱或被遮挡\n• 网络连接不稳定\n• 设备定位服务未开启\n\n建议移至空旷区域或检查设备设置。';
-            break;
-          case error.TIMEOUT:
-            errorMessage = '❌ 定位请求超时';
-            detailMessage = '定位耗时过长，可能是信号较弱。\n\n请稍后重试或移至信号较好的位置。';
-            break;
-          default:
-            errorMessage = '❌ 定位服务暂时不可用';
-            detailMessage = '未知错误，请稍后重试。如问题持续存在，请检查浏览器和设备的定位设置。';
-        }
+        // 显示临时成功提示
+        locateBtn.innerHTML = '✅ 定位成功';
+        setTimeout(() => {
+          if (!locateBtn.disabled) {
+            locateBtn.innerHTML = originalContent;
+          }
+        }, 2000);
         
-        alert(errorMessage + '\n\n' + detailMessage);
-        console.error('定位错误 [代码:' + error.code + ']:', error.message || '未知错误');
-      },
+      } catch (err) {
+        clearTimeout(timeoutWarning);
+        console.error('定位处理错误:', err);
+        // 恢复按钮状态
+        locateBtn.innerHTML = originalContent;
+        locateBtn.disabled = false;
+        alert('❌ 定位数据处理失败：' + (err.message || '未知错误') + '\n\n请重试或检查设备GPS功能');
+      }
+    };
+    
+    // 定位失败处理函数
+    const handleLocationError = (error, isRetry = false) => {
+      clearTimeout(timeoutWarning);
+      
+      // 如果是超时错误且不是重试，尝试降级策略
+      if (error.code === error.TIMEOUT && !isRetry) {
+        console.log('高精度定位超时，尝试快速定位模式...');
+        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span> 快速定位中...';
+        
+        navigator.geolocation.getCurrentPosition(
+          handleLocationSuccess,
+          (retryError) => handleLocationError(retryError, true),
+          { 
+            enableHighAccuracy: false,
+            timeout: 10000, // 快速模式10秒超时
+            maximumAge: 900000 // 允许使用15分钟内的缓存
+          }
+        );
+        return;
+      }
+      
+      // 恢复按钮状态
+      locateBtn.innerHTML = originalContent;
+      locateBtn.disabled = false;
+      
+      let errorMessage = '❌ 定位失败';
+      let detailMessage = '';
+      
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = '❌ 定位权限被拒绝';
+          detailMessage = '请在浏览器地址栏左侧点击锁图标，允许此网站访问您的位置信息，然后刷新页面重试。';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = '❌ 无法获取位置信息';
+          detailMessage = '可能原因：\n• GPS信号弱或被遮挡\n• 网络连接不稳定\n• 设备定位服务未开启\n\n建议移至空旷区域或检查设备设置。';
+          break;
+        case error.TIMEOUT:
+          errorMessage = '❌ 定位请求超时';
+          detailMessage = '定位耗时过长，可能是信号较弱。\n\n请稍后重试或移至信号较好的位置。';
+          break;
+        default:
+          errorMessage = '❌ 定位服务暂时不可用';
+          detailMessage = '未知错误，请稍后重试。如问题持续存在，请检查浏览器和设备的定位设置。';
+      }
+      
+      alert(errorMessage + '\n\n' + detailMessage);
+      console.error('定位错误 [代码:' + error.code + ']:', error.message || '未知错误');
+    };
+    
+    // 首次尝试：平衡模式
+    navigator.geolocation.getCurrentPosition(
+      handleLocationSuccess,
+      handleLocationError,
       { 
-        enableHighAccuracy: true, 
-        timeout: 15000, // 增加超时时间到15秒
-        maximumAge: 300000 // 允许使用5分钟内的缓存位置
+        enableHighAccuracy: false, // 降低精度要求以提高成功率
+        timeout: 30000, // 增加超时时间到30秒
+        maximumAge: 600000 // 允许使用10分钟内的缓存位置
       }
     );
   });
