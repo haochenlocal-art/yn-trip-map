@@ -547,7 +547,8 @@ function setupSheet() {
 }
 
 function setupGlobalActions() {
-  let currentLocationMarker = null; // 存储当前位置标记
+  // 全局存储当前位置标记数组
+  window.currentLocationMarkers = window.currentLocationMarkers || [];
   
   document.getElementById('locateBtn').addEventListener('click', () => {
     const locateBtn = document.getElementById('locateBtn');
@@ -560,7 +561,7 @@ function setupGlobalActions() {
     
     // 显示加载状态
     const originalContent = locateBtn.innerHTML;
-    locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
+    locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span> 定位中...';
     locateBtn.disabled = true;
     
     // 添加旋转动画样式
@@ -571,107 +572,181 @@ function setupGlobalActions() {
       document.head.appendChild(style);
     }
     
+    // 创建定位超时提示
+    const timeoutWarning = setTimeout(() => {
+      if (locateBtn.disabled) {
+        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span> 定位中，请稍候...';
+      }
+    }, 5000);
+    
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-        
-        // 移除之前的位置标记
-        if (currentLocationMarker) {
-          map.remove(currentLocationMarker);
+        try {
+          clearTimeout(timeoutWarning);
+          const { latitude, longitude, accuracy } = pos.coords;
+          
+          // 验证坐标有效性
+          if (isNaN(latitude) || isNaN(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            throw new Error('获取到的坐标数据无效');
+          }
+          
+          // 移除之前的位置标记
+          if (window.currentLocationMarkers) {
+            window.currentLocationMarkers.forEach(marker => map.remove(marker));
+          }
+          window.currentLocationMarkers = [];
+          
+          // 创建新的位置标记
+          const locationMarker = new AMap.CircleMarker({ 
+            center: [longitude, latitude], 
+            radius: Math.max(8, Math.min(20, accuracy / 10)), // 根据精度调整标记大小
+            strokeColor: '#10b981', 
+            fillColor: '#10b981', 
+            fillOpacity: 0.3,
+            strokeWeight: 2
+          });
+          
+          // 添加中心点
+          const centerDot = new AMap.CircleMarker({
+            center: [longitude, latitude],
+            radius: 4,
+            strokeColor: '#ffffff',
+            fillColor: '#10b981',
+            fillOpacity: 1,
+            strokeWeight: 2
+          });
+          
+          window.currentLocationMarkers = [locationMarker, centerDot];
+          map.add(window.currentLocationMarkers);
+          
+          // 添加标签
+          locationMarker.setLabel({ 
+            content: `<div style="color:#10b981;font-size:12px;background:#fff;border:1px solid #10b981;padding:4px 8px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1);font-weight:600;">📍 我的位置</div>`, 
+            direction: 'top',
+            offset: [0, -10]
+          });
+          
+          // 设置地图中心和缩放级别
+          map.setZoomAndCenter(15, [longitude, latitude]);
+          
+          // 恢复按钮状态
+          locateBtn.innerHTML = originalContent;
+          locateBtn.disabled = false;
+          
+          // 显示成功提示
+          const accuracyText = accuracy < 100 ? '高精度' : accuracy < 500 ? '中等精度' : '低精度';
+          console.log('✅ 定位成功！精度: ' + accuracy.toFixed(0) + '米 (' + accuracyText + ')');
+          
+          // 显示临时成功提示
+          locateBtn.innerHTML = '✅ 定位成功';
+          setTimeout(() => {
+            if (!locateBtn.disabled) {
+              locateBtn.innerHTML = originalContent;
+            }
+          }, 2000);
+          
+        } catch (err) {
+          clearTimeout(timeoutWarning);
+          console.error('定位处理错误:', err);
+          // 恢复按钮状态
+          locateBtn.innerHTML = originalContent;
+          locateBtn.disabled = false;
+          alert('❌ 定位数据处理失败：' + (err.message || '未知错误') + '\n\n请重试或检查设备GPS功能');
         }
-        
-        // 创建新的位置标记
-        currentLocationMarker = new AMap.CircleMarker({ 
-          center: [longitude, latitude], 
-          radius: Math.max(8, Math.min(20, accuracy / 10)), // 根据精度调整标记大小
-          strokeColor: '#10b981', 
-          fillColor: '#10b981', 
-          fillOpacity: 0.3,
-          strokeWeight: 2
-        });
-        
-        // 添加中心点
-        const centerDot = new AMap.CircleMarker({
-          center: [longitude, latitude],
-          radius: 4,
-          strokeColor: '#ffffff',
-          fillColor: '#10b981',
-          fillOpacity: 1,
-          strokeWeight: 2
-        });
-        
-        map.add([currentLocationMarker, centerDot]);
-        
-        // 添加标签
-        currentLocationMarker.setLabel({ 
-          content: `<div style="color:#10b981;font-size:12px;background:#fff;border:1px solid #10b981;padding:4px 8px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1);font-weight:600;">📍 我的位置</div>`, 
-          direction: 'top',
-          offset: [0, -10]
-        });
-        
-        // 设置地图中心和缩放级别
-        map.setZoomAndCenter(15, [longitude, latitude]);
-        
-        // 恢复按钮状态
-        locateBtn.innerHTML = originalContent;
-        locateBtn.disabled = false;
-        
-        // 显示成功提示
-        const accuracyText = accuracy < 100 ? '高精度' : accuracy < 500 ? '中等精度' : '低精度';
-        console.log(`✅ 定位成功！精度: ${accuracy.toFixed(0)}米 (${accuracyText})`);
       },
       (error) => {
+        clearTimeout(timeoutWarning);
         // 恢复按钮状态
         locateBtn.innerHTML = originalContent;
         locateBtn.disabled = false;
         
         let errorMessage = '❌ 定位失败';
+        let detailMessage = '';
+        
         switch(error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = '❌ 定位权限被拒绝\n\n请在浏览器设置中允许此网站访问您的位置信息';
+            errorMessage = '❌ 定位权限被拒绝';
+            detailMessage = '请在浏览器地址栏左侧点击锁图标，允许此网站访问您的位置信息，然后刷新页面重试。';
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = '❌ 无法获取位置信息\n\n请检查您的网络连接或GPS设置';
+            errorMessage = '❌ 无法获取位置信息';
+            detailMessage = '可能原因：\n• GPS信号弱或被遮挡\n• 网络连接不稳定\n• 设备定位服务未开启\n\n建议移至空旷区域或检查设备设置。';
             break;
           case error.TIMEOUT:
-            errorMessage = '❌ 定位请求超时\n\n请稍后重试或检查网络连接';
+            errorMessage = '❌ 定位请求超时';
+            detailMessage = '定位耗时过长，可能是信号较弱。\n\n请稍后重试或移至信号较好的位置。';
             break;
           default:
-            errorMessage = '❌ 定位服务暂时不可用\n\n请稍后重试';
+            errorMessage = '❌ 定位服务暂时不可用';
+            detailMessage = '未知错误，请稍后重试。如问题持续存在，请检查浏览器和设备的定位设置。';
         }
-        alert(errorMessage);
-        console.error('定位错误:', error);
+        
+        alert(errorMessage + '\n\n' + detailMessage);
+        console.error('定位错误 [代码:' + error.code + ']:', error.message || '未知错误');
       },
       { 
         enableHighAccuracy: true, 
-        timeout: 10000, // 增加超时时间到10秒
-        maximumAge: 60000 // 允许使用1分钟内的缓存位置
+        timeout: 15000, // 增加超时时间到15秒
+        maximumAge: 300000 // 允许使用5分钟内的缓存位置
       }
     );
   });
 
   document.getElementById('fitAllBtn').addEventListener('click', () => {
-    const group = [];
-    dayLayers.forEach((g) => group.push(...g));
-    if (group.length) map.setFitView(group, false, [60, 160, 40, 280]);
+    try {
+      const group = [];
+      dayLayers.forEach((g) => group.push(...g));
+      if (group.length) {
+        map.setFitView(group, false, [60, 160, 40, 280]);
+        console.log('✅ 已调整地图视野以显示所有景点');
+      } else {
+        console.warn('⚠️ 没有找到可显示的景点数据');
+      }
+    } catch (error) {
+      console.error('调整地图视野失败:', error);
+      alert('❌ 调整地图视野失败，请重试');
+    }
   });
 
   document.getElementById('toggleDaysBtn').addEventListener('click', (e) => {
-    const showAll = e.currentTarget.dataset.all !== '1';
-    e.currentTarget.dataset.all = showAll ? '1' : '0';
-    e.currentTarget.textContent = showAll ? '仅看当天' : '显示全部天数';
+    try {
+      const showAll = e.currentTarget.dataset.all !== '1';
+      e.currentTarget.dataset.all = showAll ? '1' : '0';
+      e.currentTarget.textContent = showAll ? '仅看当天' : '显示全部天数';
 
-    // toggle groups
-    dayLayers.forEach((g, idx) => {
-      g.forEach((o) => map.remove(o));
-      if (showAll || idx === activeDayIndex) map.add(g);
-    });
+      // 显示加载状态
+      const originalText = e.currentTarget.textContent;
+      e.currentTarget.textContent = '切换中...';
+      e.currentTarget.disabled = true;
 
-    const group = [];
-    dayLayers.forEach((g, idx) => {
-      if (showAll || idx === activeDayIndex) group.push(...g);
-    });
-    if (group.length) map.setFitView(group, false, [60, 160, 40, 280]);
+      // toggle groups
+      dayLayers.forEach((g, idx) => {
+        g.forEach((o) => map.remove(o));
+        if (showAll || idx === activeDayIndex) map.add(g);
+      });
+
+      const group = [];
+      dayLayers.forEach((g, idx) => {
+        if (showAll || idx === activeDayIndex) group.push(...g);
+      });
+      
+      if (group.length) {
+        map.setFitView(group, false, [60, 160, 40, 280]);
+        console.log(showAll ? '✅ 已显示全部天数的行程' : '✅ 已切换到仅显示当天行程');
+      }
+      
+      // 恢复按钮状态
+      setTimeout(() => {
+        e.currentTarget.textContent = originalText;
+        e.currentTarget.disabled = false;
+      }, 500);
+      
+    } catch (error) {
+      console.error('切换显示模式失败:', error);
+      alert('❌ 切换显示模式失败，请重试');
+      // 恢复按钮状态
+      e.currentTarget.disabled = false;
+    }
   });
 }
 
