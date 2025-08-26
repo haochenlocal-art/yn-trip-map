@@ -616,15 +616,15 @@ function setupGlobalActions() {
             strokeWeight: 2
           });
           
-          window.currentLocationMarkers = [locationMarker, centerDot];
-          map.add(window.currentLocationMarkers);
-          
-          // 添加标签
-          locationMarker.setLabel({ 
-            content: `<div style="color:#10b981;font-size:12px;background:#fff;border:1px solid #10b981;padding:4px 8px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1);font-weight:600;">📍 我的位置</div>`, 
-            direction: 'top',
-            offset: [0, -10]
+          // 创建标签标记（使用普通Marker来显示标签）
+          const labelMarker = new AMap.Marker({
+            position: [longitude, latitude],
+            content: `<div style="color:#10b981;font-size:12px;background:#fff;border:1px solid #10b981;padding:4px 8px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1);font-weight:600;transform:translateY(-35px);">📍 我的位置</div>`,
+            offset: new AMap.Pixel(0, 0)
           });
+          
+          window.currentLocationMarkers = [locationMarker, centerDot, labelMarker];
+          map.add(window.currentLocationMarkers);
           
           // 设置地图中心和缩放级别
           map.setZoomAndCenter(15, [longitude, latitude]);
