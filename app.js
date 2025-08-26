@@ -162,7 +162,7 @@ const itinerary = [
 ];
 
 // AMap integration
-const AMapKey = 'dc51bae1d2a001bf0eb3ff3a61b28987';
+const AMapKey = '6c341b2e19a71013ad724ceb283ae185';
 // 如果你的高德控制台开启了 Web 安全密钥校验，请在此填入 securityJsCode
 const AMapSecurityJsCode = '';
 let map;
