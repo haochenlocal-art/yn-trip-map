@@ -547,18 +547,106 @@ function setupSheet() {
 }
 
 function setupGlobalActions() {
+  let currentLocationMarker = null; // 存储当前位置标记
+  
   document.getElementById('locateBtn').addEventListener('click', () => {
-    if (!navigator.geolocation) return alert('当前设备不支持定位');
+    const locateBtn = document.getElementById('locateBtn');
+    
+    // 检查浏览器是否支持定位
+    if (!navigator.geolocation) {
+      alert('❌ 当前浏览器不支持定位功能\n\n请使用支持定位的现代浏览器（如Chrome、Safari、Firefox等）');
+      return;
+    }
+    
+    // 显示加载状态
+    const originalContent = locateBtn.innerHTML;
+    locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
+    locateBtn.disabled = true;
+    
+    // 添加旋转动画样式
+    if (!document.getElementById('spin-animation')) {
+      const style = document.createElement('style');
+      style.id = 'spin-animation';
+      style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+      document.head.appendChild(style);
+    }
+    
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const marker = new AMap.CircleMarker({ center: [longitude, latitude], radius: 8, strokeColor: '#0ea5e9', fillColor: '#0ea5e9', fillOpacity: 0.9 });
-        map.add(marker);
-        marker.setLabel({ content: '<div style="color:#0ea5e9;font-size:12px;background:#fff;border:1px solid #bfdbfe;padding:2px 4px;border-radius:4px;">我的位置</div>', direction: 'top' });
-        map.setZoomAndCenter(12, [longitude, latitude]);
+        const { latitude, longitude, accuracy } = pos.coords;
+        
+        // 移除之前的位置标记
+        if (currentLocationMarker) {
+          map.remove(currentLocationMarker);
+        }
+        
+        // 创建新的位置标记
+        currentLocationMarker = new AMap.CircleMarker({ 
+          center: [longitude, latitude], 
+          radius: Math.max(8, Math.min(20, accuracy / 10)), // 根据精度调整标记大小
+          strokeColor: '#10b981', 
+          fillColor: '#10b981', 
+          fillOpacity: 0.3,
+          strokeWeight: 2
+        });
+        
+        // 添加中心点
+        const centerDot = new AMap.CircleMarker({
+          center: [longitude, latitude],
+          radius: 4,
+          strokeColor: '#ffffff',
+          fillColor: '#10b981',
+          fillOpacity: 1,
+          strokeWeight: 2
+        });
+        
+        map.add([currentLocationMarker, centerDot]);
+        
+        // 添加标签
+        currentLocationMarker.setLabel({ 
+          content: `<div style="color:#10b981;font-size:12px;background:#fff;border:1px solid #10b981;padding:4px 8px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.1);font-weight:600;">📍 我的位置</div>`, 
+          direction: 'top',
+          offset: [0, -10]
+        });
+        
+        // 设置地图中心和缩放级别
+        map.setZoomAndCenter(15, [longitude, latitude]);
+        
+        // 恢复按钮状态
+        locateBtn.innerHTML = originalContent;
+        locateBtn.disabled = false;
+        
+        // 显示成功提示
+        const accuracyText = accuracy < 100 ? '高精度' : accuracy < 500 ? '中等精度' : '低精度';
+        console.log(`✅ 定位成功！精度: ${accuracy.toFixed(0)}米 (${accuracyText})`);
       },
-      () => alert('无法获取定位权限'),
-      { enableHighAccuracy: true, timeout: 5000 }
+      (error) => {
+        // 恢复按钮状态
+        locateBtn.innerHTML = originalContent;
+        locateBtn.disabled = false;
+        
+        let errorMessage = '❌ 定位失败';
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = '❌ 定位权限被拒绝\n\n请在浏览器设置中允许此网站访问您的位置信息';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = '❌ 无法获取位置信息\n\n请检查您的网络连接或GPS设置';
+            break;
+          case error.TIMEOUT:
+            errorMessage = '❌ 定位请求超时\n\n请稍后重试或检查网络连接';
+            break;
+          default:
+            errorMessage = '❌ 定位服务暂时不可用\n\n请稍后重试';
+        }
+        alert(errorMessage);
+        console.error('定位错误:', error);
+      },
+      { 
+        enableHighAccuracy: true, 
+        timeout: 10000, // 增加超时时间到10秒
+        maximumAge: 60000 // 允许使用1分钟内的缓存位置
+      }
     );
   });
 
