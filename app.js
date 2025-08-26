@@ -561,7 +561,7 @@ function setupGlobalActions() {
     
     // 显示加载状态
     const originalContent = locateBtn.innerHTML;
-    locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
+    locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">⟳</span>';
     locateBtn.disabled = true;
     
     // 添加旋转动画样式
@@ -575,7 +575,7 @@ function setupGlobalActions() {
     // 创建定位超时提示
     const timeoutWarning = setTimeout(() => {
       if (locateBtn.disabled) {
-        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
+        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">⟳</span>';
       }
     }, 5000);
     
@@ -637,13 +637,8 @@ function setupGlobalActions() {
         const accuracyText = accuracy < 100 ? '高精度' : accuracy < 500 ? '中等精度' : '低精度';
         console.log('✅ 定位成功！精度: ' + accuracy.toFixed(0) + '米 (' + accuracyText + ')');
         
-        // 显示临时成功提示
-        locateBtn.innerHTML = '✅ 定位成功';
-        setTimeout(() => {
-          if (!locateBtn.disabled) {
-            locateBtn.innerHTML = originalContent;
-          }
-        }, 2000);
+        // 直接恢复原始内容，不显示成功提示
+         // locateBtn.innerHTML = originalContent; // 已在上面恢复
         
       } catch (err) {
         clearTimeout(timeoutWarning);
@@ -662,7 +657,7 @@ function setupGlobalActions() {
       // 如果是超时错误且不是重试，尝试降级策略
       if (error.code === error.TIMEOUT && !isRetry) {
         console.log('高精度定位超时，尝试快速定位模式...');
-        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
+        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">⟳</span>';
         
         navigator.geolocation.getCurrentPosition(
           handleLocationSuccess,
