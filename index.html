@@ -11,9 +11,14 @@
   <body>
     <header class="app-header">
       <div class="header-left">
+        <div class="user-avatar">
+          <img src="./avatar.svg" alt="用户头像" class="avatar-img">
+          <div class="avatar-status"></div>
+        </div>
         <span class="logo">YN</span>
         <div class="titles">
           <h1>💕 云南7日行 💕</h1>
+          <p class="subtitle">与你一起的浪漫旅程</p>
         </div>
       </div>
       <div class="header-actions">
@@ -49,7 +54,18 @@
         <div class="sheet-handle" id="sheetHandle"></div>
         <div class="sheet-content">
           <div class="sheet-header">
-            <h2 id="sheetTitle">💕 浪漫行程详情 💕</h2>
+            <div class="header-main">
+              <h2 id="sheetTitle">💕 浪漫行程详情 💕</h2>
+              <div class="travel-mood">
+                <span class="mood-icon">✨</span>
+                <span class="mood-text">期待每一个美好瞬间</span>
+                <div class="mood-tags">
+                  <span class="mood-tag">🌸 浪漫</span>
+                  <span class="mood-tag">📸 记录</span>
+                  <span class="mood-tag">💕 甜蜜</span>
+                </div>
+              </div>
+            </div>
             <button id="toggleDaysBtn" class="btn btn-text">显示全部天数</button>
           </div>
           <div class="sheet-body" id="sheetBody">
