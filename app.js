@@ -474,18 +474,76 @@ function setupSheet() {
   const handle = document.getElementById('sheetHandle');
   let startY = 0;
   let startTranslate = 0;
-  const getTranslate = () => (sheet.classList.contains('expanded') ? 0 : 45);
-  const setTranslate = (v) => { const c = Math.max(0, Math.min(45, v)); sheet.style.transform = `translateY(${c}%)`; };
-  const commit = (v) => { sheet.style.transform = ''; if (v < 22.5) sheet.classList.add('expanded'); else sheet.classList.remove('expanded'); };
-  const onStart = (y) => { startY = y; startTranslate = getTranslate(); sheet.style.transition = 'none'; };
-  const onMove = (y) => setTranslate(startTranslate + (y - startY) / 6);
-  const onEnd = (y) => { sheet.style.transition = ''; commit(startTranslate + (y - startY) / 6); };
+  let isDragging = false;
+  
+  // 三个状态：hidden(95), collapsed(45), expanded(0)
+  const getTranslate = () => {
+    if (sheet.classList.contains('expanded')) return 0;
+    if (sheet.classList.contains('hidden')) return 95;
+    return 45; // collapsed
+  };
+  
+  const setTranslate = (v) => { 
+    const c = Math.max(0, Math.min(95, v)); 
+    sheet.style.transform = `translateY(${c}%)`; 
+  };
+  
+  const commit = (v) => { 
+    sheet.style.transform = ''; 
+    sheet.classList.remove('expanded', 'hidden');
+    if (v < 15) {
+      sheet.classList.add('expanded');
+    } else if (v > 70) {
+      sheet.classList.add('hidden');
+    }
+    // 默认状态是 collapsed (45%)
+  };
+  
+  const onStart = (y) => { 
+    startY = y; 
+    startTranslate = getTranslate(); 
+    sheet.style.transition = 'none';
+    isDragging = false;
+  };
+  
+  const onMove = (y) => {
+    if (Math.abs(y - startY) > 5) {
+      isDragging = true;
+    }
+    setTranslate(startTranslate + (y - startY) / 6);
+  };
+  
+  const onEnd = (y) => { 
+    sheet.style.transition = ''; 
+    commit(startTranslate + (y - startY) / 6);
+  };
+  
+  // 拖拽事件
   handle.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY), { passive: true });
   handle.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY), { passive: true });
   handle.addEventListener('touchend', (e) => onEnd(e.changedTouches[0].clientY));
   handle.addEventListener('mousedown', (e) => onStart(e.clientY));
   window.addEventListener('mousemove', (e) => { if (startY) onMove(e.clientY); });
   window.addEventListener('mouseup', (e) => { if (startY) { onEnd(e.clientY); startY = 0; } });
+  
+  // 点击事件 - 循环切换状态
+  handle.addEventListener('click', (e) => {
+    // 防止拖拽时触发点击
+    if (isDragging) {
+      return;
+    }
+    
+    const currentState = getTranslate();
+    sheet.classList.remove('expanded', 'hidden');
+    
+    if (currentState === 0) { // expanded -> collapsed
+      // 默认状态，不需要添加类
+    } else if (currentState === 45) { // collapsed -> hidden
+      sheet.classList.add('hidden');
+    } else { // hidden -> expanded
+      sheet.classList.add('expanded');
+    }
+  });
 }
 
 function setupGlobalActions() {
