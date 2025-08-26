@@ -164,7 +164,7 @@ const itinerary = [
 // AMap integration
 const AMapKey = '6c341b2e19a71013ad724ceb283ae185';
 // 如果你的高德控制台开启了 Web 安全密钥校验，请在此填入 securityJsCode
-const AMapSecurityJsCode = '';
+const AMapSecurityJsCode = '2c7829c1cd5cf4d83c2175dd40b7dac7';
 let map;
 const dayLayers = new Map();
 let activeDayIndex = 0;
