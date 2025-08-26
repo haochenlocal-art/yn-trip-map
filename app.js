@@ -627,6 +627,7 @@ loadAMap()
       setActiveDay(0);
       setupSheet();
       setupGlobalActions();
+      initQixiEffects(); // 初始化七夕特效
       
       // 延迟隐藏加载状态，让用户看到路线正在生成
       setTimeout(() => {
@@ -644,5 +645,95 @@ loadAMap()
     console.error('高德地图加载失败:', error);
     showErrorStatus('高德地图加载失败，可能是网络问题或API Key配置问题。请检查网络连接后重试。');
   });
+
+// 七夕主题特效
+function initQixiEffects() {
+  // 创建爱心飘落动画
+  createHeartFall();
+  
+  // 显示七夕祝福横幅
+  showQixiBanner();
+  
+  // 添加浪漫的地图标记样式
+  addRomanticMapStyles();
+}
+
+function createHeartFall() {
+  const heartsContainer = document.getElementById('heartsContainer');
+  const heartSymbols = ['💖', '💕', '💗', '💝', '💘', '❤️', '🌹'];
+  
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+    
+    // 随机位置和大小
+    heart.style.left = Math.random() * 100 + '%';
+    heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
+    heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
+    heart.style.animationDelay = Math.random() * 2 + 's';
+    
+    heartsContainer.appendChild(heart);
+    
+    // 动画结束后移除元素
+    setTimeout(() => {
+      if (heart.parentNode) {
+        heart.parentNode.removeChild(heart);
+      }
+    }, 8000);
+  }
+  
+  // 每隔一段时间创建新的爱心
+  setInterval(createHeart, 800);
+  
+  // 初始创建几个爱心
+  for (let i = 0; i < 3; i++) {
+    setTimeout(createHeart, i * 300);
+  }
+}
+
+function showQixiBanner() {
+  const banner = document.getElementById('qixiBanner');
+  
+  // 随机更换祝福语
+  const blessings = [
+    '愿我们的爱情如云南的风景一样美丽永恒',
+    '七夕快乐！与你同游云南是最美的浪漫',
+    '山水为证，星月为媒，此生与你不离不弃',
+    '在最美的风景里，遇见最爱的你',
+    '云南七日，每一天都是我们的纪念日'
+  ];
+  
+  let currentIndex = 0;
+  const blessingText = banner.querySelector('.blessing-text');
+  
+  function changeBlessingText() {
+    blessingText.style.opacity = '0';
+    setTimeout(() => {
+      blessingText.textContent = blessings[currentIndex];
+      blessingText.style.opacity = '1';
+      currentIndex = (currentIndex + 1) % blessings.length;
+    }, 500);
+  }
+  
+  // 每10秒更换一次祝福语
+  setInterval(changeBlessingText, 10000);
+  
+  // 添加点击事件
+  banner.addEventListener('click', () => {
+    banner.style.transform = 'translateX(-50%) scale(1.1)';
+    setTimeout(() => {
+      banner.style.transform = 'translateX(-50%) scale(1)';
+    }, 200);
+  });
+}
+
+function addRomanticMapStyles() {
+  // 为地图添加浪漫的样式效果
+  if (map) {
+    // 可以在这里添加地图的浪漫主题样式
+    console.log('🌹 七夕浪漫主题已启用 🌹');
+  }
+}
 
 

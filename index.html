@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <meta name="theme-color" content="#0ea5e9" />
-    <title>云南7日行 · 地图行程</title>
+    <meta name="theme-color" content="#ec4899" />
+    <title>💕 云南7日行 · 七夕浪漫之旅 💕</title>
     <!-- 如使用高德底图，无需额外CSS，此处仅保留应用样式 -->
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -13,8 +13,8 @@
       <div class="header-left">
         <span class="logo">YN</span>
         <div class="titles">
-          <h1>云南7日行</h1>
-          <p>昆明 · 大理 · 丽江 · 香格里拉</p>
+          <h1>💕 云南7日行 💕</h1>
+          <p>昆明 · 大理 · 丽江 · 香格里拉 | 七夕浪漫之旅</p>
         </div>
       </div>
       <div class="header-actions">
@@ -34,11 +34,23 @@
         <!-- 动态渲染 -->
       </nav>
 
+      <!-- 七夕爱心飘落动画 -->
+      <div class="hearts-container" id="heartsContainer"></div>
+      
+      <!-- 七夕祝福横幅 -->
+      <div class="qixi-banner" id="qixiBanner">
+        <div class="banner-content">
+          <span class="heart-icon">💖</span>
+          <span class="blessing-text">愿我们的爱情如云南的风景一样美丽永恒</span>
+          <span class="heart-icon">💖</span>
+        </div>
+      </div>
+
       <section class="bottom-sheet" id="bottomSheet" aria-live="polite">
         <div class="sheet-handle" id="sheetHandle"></div>
         <div class="sheet-content">
           <div class="sheet-header">
-            <h2 id="sheetTitle">行程详情</h2>
+            <h2 id="sheetTitle">💕 浪漫行程详情 💕</h2>
             <button id="toggleDaysBtn" class="btn btn-text">显示全部天数</button>
           </div>
           <div class="sheet-body" id="sheetBody">
