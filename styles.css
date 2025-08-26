@@ -16,7 +16,7 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 .btn-focus { background: linear-gradient(135deg, #ec4899, #f97316); color: #fff; border-color: #ec4899; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); }
 
 .app-main { position: relative; height: calc(100% - 60px); }
-#map { position: fixed; inset: 150px 0 0 0; }
+#map { position: fixed; inset: 170px 0 0 0; }
 
 .day-tabs { position: fixed; top: 60px; left: 0; right: 0; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 12px; background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); z-index: 9; border-bottom: 1px solid rgba(226,232,240,0.8); }
 .day-tabs::-webkit-scrollbar { display: none; }
@@ -95,7 +95,7 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 
 .qixi-banner {
   position: fixed;
-  top: 108px;
+  top: 130px;
   left: 12px;
   right: 12px;
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.9), rgba(249, 115, 22, 0.9));
@@ -161,7 +161,7 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
   .bottom-sheet { max-height: 70vh; }
   .sheet-content { max-height: 68vh; }
   .qixi-banner {
-    top: 100px;
+    top: 120px;
     left: 8px;
     right: 8px;
     font-size: 12px;
