@@ -561,7 +561,7 @@ function setupGlobalActions() {
     
     // 显示加载状态
     const originalContent = locateBtn.innerHTML;
-    locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span> 定位中...';
+    locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
     locateBtn.disabled = true;
     
     // 添加旋转动画样式
@@ -575,7 +575,7 @@ function setupGlobalActions() {
     // 创建定位超时提示
     const timeoutWarning = setTimeout(() => {
       if (locateBtn.disabled) {
-        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span> 定位中，请稍候...';
+        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
       }
     }, 5000);
     
@@ -662,7 +662,7 @@ function setupGlobalActions() {
       // 如果是超时错误且不是重试，尝试降级策略
       if (error.code === error.TIMEOUT && !isRetry) {
         console.log('高精度定位超时，尝试快速定位模式...');
-        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span> 快速定位中...';
+        locateBtn.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span>';
         
         navigator.geolocation.getCurrentPosition(
           handleLocationSuccess,
