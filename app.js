@@ -883,8 +883,17 @@ loadAMap()
 
 // 七夕主题特效
 function initQixiEffects() {
-  // 创建爱心飘落动画
+  // 显示七夕快乐弹出动画
+  showQixiPopup();
+  
+  // 创建爱心飘落效果
   createHeartFall();
+  
+  // 创建玫瑰花瓣飘落效果
+  createPetalFall();
+  
+  // 创建星星装饰
+  createStars();
   
   // 显示七夕祝福横幅
   showQixiBanner();
@@ -893,9 +902,65 @@ function initQixiEffects() {
   addRomanticMapStyles();
 }
 
+// 创建星星装饰
+function createStars() {
+  const starsContainer = document.getElementById('starsContainer');
+  const starSymbols = ['✨', '⭐', '🌟', '💫', '⚡'];
+  
+  // 创建固定位置的星星
+  for (let i = 0; i < 15; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.textContent = starSymbols[Math.floor(Math.random() * starSymbols.length)];
+    
+    // 随机位置
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 60 + '%'; // 只在上半部分显示
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    
+    starsContainer.appendChild(star);
+  }
+}
+
+// 显示七夕快乐弹出动画
+function showQixiPopup() {
+  const popup = document.getElementById('qixiPopup');
+  if (popup) {
+    // 显示弹出窗口
+    popup.style.display = 'block';
+    
+    // 4秒后自动移除弹出窗口
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 4000);
+  }
+}
+
+// 添加浪漫的地图标记样式
+function addRomanticMapStyles() {
+  // 为按钮添加七夕样式
+  const buttons = document.querySelectorAll('.btn, .location-btn, .date-btn');
+  buttons.forEach(button => {
+    if (!button.classList.contains('qixi-button')) {
+      button.classList.add('qixi-button');
+    }
+  });
+  
+  // 为地图标记添加浪漫效果
+  setTimeout(() => {
+    const markers = document.querySelectorAll('.leaflet-marker-icon');
+    markers.forEach(marker => {
+      if (!marker.classList.contains('romantic-marker')) {
+        marker.classList.add('romantic-marker');
+      }
+    });
+  }, 1000);
+}
+
 function createHeartFall() {
   const heartsContainer = document.getElementById('heartsContainer');
-  const heartSymbols = ['💖', '💕', '💗', '💝', '💘', '❤️', '🌹'];
+  const heartSymbols = ['💖', '💕', '💗', '💝', '💘', '❤️', '🌹', '💐'];
   
   function createHeart() {
     const heart = document.createElement('div');
@@ -904,9 +969,9 @@ function createHeartFall() {
     
     // 随机位置和大小
     heart.style.left = Math.random() * 100 + '%';
-    heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
-    heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
-    heart.style.animationDelay = Math.random() * 2 + 's';
+    heart.style.fontSize = (Math.random() * 12 + 16) + 'px';
+    heart.style.animationDuration = (Math.random() * 4 + 6) + 's';
+    heart.style.animationDelay = Math.random() * 3 + 's';
     
     heartsContainer.appendChild(heart);
     
@@ -915,15 +980,50 @@ function createHeartFall() {
       if (heart.parentNode) {
         heart.parentNode.removeChild(heart);
       }
-    }, 8000);
+    }, 10000);
   }
   
   // 每隔一段时间创建新的爱心
-  setInterval(createHeart, 800);
+  setInterval(createHeart, 1200);
   
   // 初始创建几个爱心
-  for (let i = 0; i < 3; i++) {
-    setTimeout(createHeart, i * 300);
+  for (let i = 0; i < 6; i++) {
+    setTimeout(createHeart, i * 400);
+  }
+}
+
+// 创建玫瑰花瓣飘落效果
+function createPetalFall() {
+  const petalsContainer = document.getElementById('petalsContainer');
+  const petalSymbols = ['🌸', '🌺', '🌷', '🥀', '🌹'];
+  
+  function createPetal() {
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    petal.textContent = petalSymbols[Math.floor(Math.random() * petalSymbols.length)];
+    
+    // 随机位置和样式
+    petal.style.left = Math.random() * 100 + '%';
+    petal.style.fontSize = (Math.random() * 8 + 12) + 'px';
+    petal.style.animationDuration = (Math.random() * 6 + 10) + 's';
+    petal.style.animationDelay = Math.random() * 4 + 's';
+    
+    petalsContainer.appendChild(petal);
+    
+    // 动画结束后移除元素
+    setTimeout(() => {
+      if (petal.parentNode) {
+        petal.parentNode.removeChild(petal);
+      }
+    }, 16000);
+  }
+  
+  // 定期创建花瓣
+  setInterval(createPetal, 2000);
+  
+  // 初始创建几个花瓣
+  for (let i = 0; i < 4; i++) {
+    setTimeout(createPetal, i * 600);
   }
 }
 
@@ -936,7 +1036,12 @@ function showQixiBanner() {
     '七夕快乐！愿你的云南之旅如诗如画',
     '山水为伴，星月同行，愿你旅途平安快乐',
     '在最美的风景里，遇见最好的自己',
-    '云南七日，每一天都是你的专属回忆'
+    '云南七日，每一天都是你的专属回忆',
+    '愿你的爱情如云南的蓝天一样纯净美好',
+    '在彩云之南，许下最美的心愿',
+    '愿你们的爱情如梯田般层层递进，永不凋零',
+    '七夕佳节，愿你在云南收获满满的幸福',
+    '愿这趟旅程成为你们爱情故事中最美的篇章'
   ];
   
   let currentIndex = 0;
